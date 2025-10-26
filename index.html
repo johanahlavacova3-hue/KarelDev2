@@ -7,21 +7,60 @@
 </head>
 <body>
 
-<div class="sidebar">
-  <textarea id="editor" placeholder="Napiš svůj kód...
+<!-- -----------------------------
+     ÚVODNÍ OBRAZOVKA
+---------------------------------->
+<div id="start-screen">
+  <h1>KAREL THE ROBOT 25'</h1>
+  <p>Zvol mód hry:</p>
+  <div class="mode-buttons">
+    <button id="mode-code">Code Mode</button>
+    <button id="mode-maze">Maze Mode</button>
+  </div>
+</div>
+
+<!-- -----------------------------
+     HERNÍ OBSAH
+---------------------------------->
+<div id="game-screen" class="hidden">
+  <div class="sidebar">
+    <textarea id="editor" placeholder="Napiš svůj kód...
 například:
 move();
 turnLeft();
 putBeeper();
 move();"></textarea>
-  <button id="runBtn"></button>
+    <button id="runBtn"></button>
+  </div>
+  <div id="grid"></div>
 </div>
-
-<div id="grid"></div>
 
 <script>
 // --------------------------------------
-// Nastavení mřížky
+// 1️⃣ Přepínání mezi start a hrou
+// --------------------------------------
+const startScreen = document.getElementById('start-screen');
+const gameScreen = document.getElementById('game-screen');
+const modeCodeBtn = document.getElementById('mode-code');
+const modeMazeBtn = document.getElementById('mode-maze');
+let currentMode = null;
+
+modeCodeBtn.addEventListener('click', () => {
+  currentMode = 'code';
+  startScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  startCodeMode();
+});
+
+modeMazeBtn.addEventListener('click', () => {
+  currentMode = 'maze';
+  startScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  startMazeMode();
+});
+
+// --------------------------------------
+// 2️⃣ Sdílené nastavení mřížky
 // --------------------------------------
 const grid = document.getElementById('grid');
 const GRID_COLS = 7;
@@ -38,17 +77,13 @@ function createGrid() {
     grid.appendChild(cell);
   }
 }
-createGrid();
 
 // --------------------------------------
-// Robot
+// 3️⃣ KAREL
 // --------------------------------------
 const robot = document.createElement('div');
 robot.id = 'robot';
-grid.appendChild(robot);
-
 let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
-grid.children[posY * GRID_COLS + posX].appendChild(robot);
 
 function updateRobotRotation() {
   let angle = 0;
@@ -57,7 +92,6 @@ function updateRobotRotation() {
   if (dir === 'left') angle = 180;
   robot.style.transform = `rotate(${angle}deg)`;
 }
-updateRobotRotation();
 
 function resetWorld() {
   posX = 0; posY = GRID_ROWS - 1; dir = 'right';
@@ -71,7 +105,7 @@ function resetWorld() {
 }
 
 // --------------------------------------
-// Příkazy Karela
+// 4️⃣ Herní logika Code Mode
 // --------------------------------------
 function move() {
   let dx = 0, dy = 0;
@@ -120,9 +154,6 @@ function paintCorner(color = 'blue') {
   cell.style.backgroundColor = color;
 }
 
-// --------------------------------------
-// Podmínky
-// --------------------------------------
 function frontIsClear() {
   if (dir === 'up' && posY > 0) return true;
   if (dir === 'down' && posY < GRID_ROWS - 1) return true;
@@ -132,22 +163,8 @@ function frontIsClear() {
 }
 function frontIsBlocked() { return !frontIsClear(); }
 
-function facingNorth() { return dir === 'up'; }
-function facingSouth() { return dir === 'down'; }
-function facingEast() { return dir === 'right'; }
-function facingWest() { return dir === 'left'; }
-
-function notFacingNorth() { return !facingNorth(); }
-function notFacingSouth() { return !facingSouth(); }
-function notFacingEast() { return !facingEast(); }
-function notFacingWest() { return !facingWest(); }
-
-function random(p = 0.5) {
-  return Math.random() < p;
-}
-
 // --------------------------------------
-// Spouštění uživatelského kódu
+// 5️⃣ Spouštění Code Mode
 // --------------------------------------
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -168,7 +185,28 @@ async function runUserCode() {
 }
 
 document.getElementById('runBtn').addEventListener('click', runUserCode);
-</script>
 
+function startCodeMode() {
+  createGrid();
+  grid.appendChild(robot);
+  resetWorld();
+}
+
+// --------------------------------------
+// 6️⃣ Maze Mode
+// --------------------------------------
+function startMazeMode() {
+  createGrid();
+  grid.appendChild(robot);
+  resetWorld();
+
+  // Přidáme "zdi" — prosté překážky v několika buňkách
+  const walls = [5, 6, 7, 15, 16];
+  walls.forEach(i => {
+    grid.children[i].classList.add('wall');
+  });
+}
+
+</script>
 </body>
 </html>
