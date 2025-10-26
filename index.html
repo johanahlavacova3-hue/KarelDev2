@@ -8,7 +8,7 @@
 <body>
 
 <!-- -----------------------------
-     ÚVODNÍ OBRAZOVKA
+     STARTOVACÍ OBRAZOVKA
 ---------------------------------->
 <div id="start-screen">
   <h1>KAREL THE ROBOT 25'</h1>
@@ -20,7 +20,7 @@
 </div>
 
 <!-- -----------------------------
-     HERNÍ OBSAH
+     PŮVODNÍ OBSAH HRY
 ---------------------------------->
 <div id="game-screen" class="hidden">
   <div class="sidebar">
@@ -32,181 +32,70 @@ putBeeper();
 move();"></textarea>
     <button id="runBtn"></button>
   </div>
+
   <div id="grid"></div>
 </div>
 
 <script>
-// --------------------------------------
-// 1️⃣ Přepínání mezi start a hrou
-// --------------------------------------
+// ---------------------------------------------------
+// 🟩 1. Přepínání módů
+// ---------------------------------------------------
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
 const modeCodeBtn = document.getElementById('mode-code');
 const modeMazeBtn = document.getElementById('mode-maze');
-let currentMode = null;
+let currentMode = 'code'; // výchozí
 
 modeCodeBtn.addEventListener('click', () => {
   currentMode = 'code';
   startScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
-  startCodeMode();
+  resetWorld();
 });
 
 modeMazeBtn.addEventListener('click', () => {
   currentMode = 'maze';
   startScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
-  startMazeMode();
+  startMazeWorld();
 });
 
-// --------------------------------------
-// 2️⃣ Sdílené nastavení mřížky
-// --------------------------------------
-const grid = document.getElementById('grid');
-const GRID_COLS = 7;
-const GRID_ROWS = 4;
-
-function createGrid() {
-  grid.innerHTML = '';
-  grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
-  grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
-  for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    cell.dataset.beepers = 0;
-    grid.appendChild(cell);
-  }
-}
-
-// --------------------------------------
-// 3️⃣ KAREL
-// --------------------------------------
-const robot = document.createElement('div');
-robot.id = 'robot';
-let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
-
-function updateRobotRotation() {
-  let angle = 0;
-  if (dir === 'up') angle = -90;
-  if (dir === 'down') angle = 90;
-  if (dir === 'left') angle = 180;
-  robot.style.transform = `rotate(${angle}deg)`;
-}
-
-function resetWorld() {
-  posX = 0; posY = GRID_ROWS - 1; dir = 'right';
-  updateRobotRotation();
-  document.querySelectorAll('#grid .cell').forEach(cell => {
-    if (cell.contains(robot)) cell.removeChild(robot);
-  });
-  grid.children[posY * GRID_COLS + posX].appendChild(robot);
-  document.querySelectorAll('.beeper').forEach(b => b.remove());
-  document.querySelectorAll('#grid .cell').forEach(c => c.dataset.beepers = 0);
-}
-
-// --------------------------------------
-// 4️⃣ Herní logika Code Mode
-// --------------------------------------
-function move() {
-  let dx = 0, dy = 0;
-  if (dir === 'right') dx = 1;
-  if (dir === 'left') dx = -1;
-  if (dir === 'up') dy = -1;
-  if (dir === 'down') dy = 1;
-  const newX = posX + dx, newY = posY + dy;
-  if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
-  grid.children[posY * GRID_COLS + posX].removeChild(robot);
-  posX = newX; posY = newY;
-  grid.children[posY * GRID_COLS + posX].appendChild(robot);
-}
-
-function turnLeft() {
-  if (dir === 'up') dir = 'left';
-  else if (dir === 'left') dir = 'down';
-  else if (dir === 'down') dir = 'right';
-  else if (dir === 'right') dir = 'up';
-  updateRobotRotation();
-}
-
-function turnRight() {
-  if (dir === 'up') dir = 'right';
-  else if (dir === 'right') dir = 'down';
-  else if (dir === 'down') dir = 'left';
-  else if (dir === 'left') dir = 'up';
-  updateRobotRotation();
-}
-
-function putBeeper() {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  const beeper = document.createElement('div');
-  beeper.className = 'beeper';
-  cell.appendChild(beeper);
-}
-
-function pickBeeper() {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  const beeper = cell.querySelector('.beeper');
-  if (beeper) beeper.remove();
-}
-
-function paintCorner(color = 'blue') {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  cell.style.backgroundColor = color;
-}
-
-function frontIsClear() {
-  if (dir === 'up' && posY > 0) return true;
-  if (dir === 'down' && posY < GRID_ROWS - 1) return true;
-  if (dir === 'left' && posX > 0) return true;
-  if (dir === 'right' && posX < GRID_COLS - 1) return true;
-  return false;
-}
-function frontIsBlocked() { return !frontIsClear(); }
-
-// --------------------------------------
-// 5️⃣ Spouštění Code Mode
-// --------------------------------------
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function runUserCode() {
-  resetWorld();
-  const code = document.getElementById('editor').value;
-  const lines = code.split('\n').filter(l => l.trim() !== '');
-  for (let line of lines) {
-    try {
-      await delay(300);
-      eval(line);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-}
-
-document.getElementById('runBtn').addEventListener('click', runUserCode);
-
-function startCodeMode() {
-  createGrid();
-  grid.appendChild(robot);
-  resetWorld();
-}
-
-// --------------------------------------
-// 6️⃣ Maze Mode
-// --------------------------------------
-function startMazeMode() {
-  createGrid();
-  grid.appendChild(robot);
+// ---------------------------------------------------
+// 🟩 2. Funkce pro vytvoření bludiště
+// ---------------------------------------------------
+function startMazeWorld() {
   resetWorld();
 
-  // Přidáme "zdi" — prosté překážky v několika buňkách
-  const walls = [5, 6, 7, 15, 16];
-  walls.forEach(i => {
+  // jednoduché „zdi“ ve vybraných buňkách
+  const wallIndices = [5, 6, 7, 15, 16, 22];
+  wallIndices.forEach(i => {
     grid.children[i].classList.add('wall');
   });
 }
 
+// ---------------------------------------------------
+// 🟩 3. Rozšíření pohybu v Maze módu (kolize se zdí)
+// ---------------------------------------------------
+const originalMove = move;
+move = function() {
+  if (currentMode === 'maze') {
+    let dx = 0, dy = 0;
+    if (dir === 'right') dx = 1;
+    if (dir === 'left') dx = -1;
+    if (dir === 'up') dy = -1;
+    if (dir === 'down') dy = 1;
+    const newX = posX + dx, newY = posY + dy;
+    if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
+    const targetCell = grid.children[newY * GRID_COLS + newX];
+    if (targetCell.classList.contains('wall')) return; // zabrání průchodu
+    grid.children[posY * GRID_COLS + posX].removeChild(robot);
+    posX = newX; posY = newY;
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  } else {
+    originalMove(); // běžné chování v Code Mode
+  }
+};
 </script>
+
 </body>
 </html>
