@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Karel – Code Mode</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar">
+    <textarea id="editor" placeholder="Napiš svůj kód...
+například:
+move();
+turnLeft();
+putBeeper();
+move();"></textarea>
+    <button id="runBtn"></button>
+  </div>
+  <div id="grid"></div>
+
+  <script>
+  const grid = document.getElementById('grid');
+  const GRID_COLS = 7;
+  const GRID_ROWS = 4;
+
+  function createGrid() {
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
+    for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      grid.appendChild(cell);
+    }
+  }
+  createGrid();
+
+  const robot = document.createElement('div');
+  robot.id = 'robot';
+  grid.appendChild(robot);
+  let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
+  grid.children[posY * GRID_COLS + posX].appendChild(robot);
+
+  function updateRobotRotation() {
+    let angle = 0;
+    if (dir === 'up') angle = -90;
+    if (dir === 'down') angle = 90;
+    if (dir === 'left') angle = 180;
+    robot.style.transform = `rotate(${angle}deg)`;
+  }
+
+  function resetWorld() {
+    posX = 0; posY = GRID_ROWS - 1; dir = 'right';
+    updateRobotRotation();
+    document.querySelectorAll('.beeper').forEach(b => b.remove());
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  }
+
+  function move() {
+    let dx = 0, dy = 0;
+    if (dir === 'right') dx = 1;
+    if (dir === 'left') dx = -1;
+    if (dir === 'up') dy = -1;
+    if (dir === 'down') dy = 1;
+    const newX = posX + dx, newY = posY + dy;
+    if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
+    grid.children[posY * GRID_COLS + posX].removeChild(robot);
+    posX = newX; posY = newY;
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  }
+
+  function turnLeft() {
+    if (dir === 'up') dir = 'left';
+    else if (dir === 'left') dir = 'down';
+    else if (dir === 'down') dir = 'right';
+    else if (dir === 'right') dir = 'up';
+    updateRobotRotation();
+  }
+
+  function putBeeper() {
+    const cell = grid.children[posY * GRID_COLS + posX];
+    const beeper = document.createElement('div');
+    beeper.className = 'beeper';
+    cell.appendChild(beeper);
+  }
+
+  async function runUserCode() {
+    resetWorld();
+    const code = document.getElementById('editor').value;
+    const lines = code.split('\n').filter(l => l.trim() !== '');
+    for (let line of lines) {
+      try {
+        await new Promise(r => setTimeout(r, 300));
+        eval(line);
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  document.getElementById('runBtn').addEventListener('click', runUserCode);
+  </script>
+</body>
+</html>
