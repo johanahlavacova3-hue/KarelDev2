@@ -2,10 +2,13 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>Karel The Robot 25'</title>
+<title>Karel The Robot 25' – Maze Mode</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- [MAZE MODE] Přidaný home button -->
+<a href="index.html" class="home-btn">Home</a>
 
 <div class="sidebar">
   <textarea id="editor" placeholder="Napiš svůj kód...
@@ -37,7 +40,20 @@ function createGrid() {
     cell.dataset.beepers = 0;
     grid.appendChild(cell);
   }
+
+  // [MAZE MODE] – Vytvoření překážek
+  createMazeWalls();
 }
+
+// [MAZE MODE] Funkce pro vytvoření "zdí"
+function createMazeWalls() {
+  const wallIndices = [3, 4, 10, 16, 17, 18, 25]; // buňky, kde budou zdi
+  wallIndices.forEach(i => {
+    const cell = grid.children[i];
+    cell.classList.add('wall');
+  });
+}
+
 createGrid();
 
 // --------------------------------------
@@ -68,6 +84,7 @@ function resetWorld() {
   grid.children[posY * GRID_COLS + posX].appendChild(robot);
   document.querySelectorAll('.beeper').forEach(b => b.remove());
   document.querySelectorAll('#grid .cell').forEach(c => c.dataset.beepers = 0);
+  createMazeWalls(); // [MAZE MODE] – znovu vytvoří překážky po resetu
 }
 
 // --------------------------------------
@@ -81,6 +98,11 @@ function move() {
   if (dir === 'down') dy = 1;
   const newX = posX + dx, newY = posY + dy;
   if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
+
+  // [MAZE MODE] Kontrola zda cílová buňka není zeď
+  const targetCell = grid.children[newY * GRID_COLS + newX];
+  if (targetCell.classList.contains('wall')) return;
+
   grid.children[posY * GRID_COLS + posX].removeChild(robot);
   posX = newX; posY = newY;
   grid.children[posY * GRID_COLS + posX].appendChild(robot);
@@ -124,12 +146,18 @@ function paintCorner(color = 'blue') {
 // Podmínky
 // --------------------------------------
 function frontIsClear() {
-  if (dir === 'up' && posY > 0) return true;
-  if (dir === 'down' && posY < GRID_ROWS - 1) return true;
-  if (dir === 'left' && posX > 0) return true;
-  if (dir === 'right' && posX < GRID_COLS - 1) return true;
-  return false;
+  let dx = 0, dy = 0;
+  if (dir === 'right') dx = 1;
+  if (dir === 'left') dx = -1;
+  if (dir === 'up') dy = -1;
+  if (dir === 'down') dy = 1;
+  const newX = posX + dx, newY = posY + dy;
+  if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return false;
+
+  const targetCell = grid.children[newY * GRID_COLS + newX];
+  return !targetCell.classList.contains('wall');
 }
+
 function frontIsBlocked() { return !frontIsClear(); }
 
 function facingNorth() { return dir === 'up'; }
