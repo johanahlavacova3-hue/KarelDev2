@@ -1,3 +1,6 @@
+/* --------------------------------------
+   ZÁKLAD
+----------------------------------------- */
 body {
   background-color: #000;
   color: #d6d6d6;
@@ -9,37 +12,9 @@ body {
   align-items: center;
 }
 
-/* --- Úvodní stránka --- */
-#start-screen {
-  flex-direction: column;
-}
-
-#start-screen h1 {
-  font-size: 40px;
-  margin-bottom: 40px;
-}
-
-.mode-buttons {
-  display: flex;
-  gap: 60px;
-}
-
-.mode-btn {
-  background: #1b1b1b;
-  color: #fff;
-  text-decoration: none;
-  border: 1px solid #444;
-  padding: 14px 30px;
-  font-size: 20px;
-  transition: all 0.2s;
-}
-
-.mode-btn:hover {
-  background: #333;
-  transform: scale(1.1);
-}
-
-/* --- Herní layout --- */
+/* --------------------------------------
+   HERNÍ LAYOUT
+----------------------------------------- */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -65,6 +40,7 @@ body {
   height: calc(100% - 60px);
 }
 
+/* tlačítko Play (jen PNG) */
 #runBtn {
   align-self: center;
   width: 36px;
@@ -78,11 +54,13 @@ body {
   cursor: pointer;
   transition: transform 0.2s;
 }
-
 #runBtn:hover {
   transform: scale(1.1);
 }
 
+/* --------------------------------------
+   HERNÍ GRID
+----------------------------------------- */
 #grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -138,7 +116,7 @@ body.start-screen {
   background-image: url('BackroundStartPage.png');
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain; /* zachová poměr stran obrázku */
+  background-size: contain;
 }
 
 .start-container {
@@ -149,14 +127,14 @@ body.start-screen {
   gap: 40px;
 }
 
-/* Logo "KarelTypo.png" */
+/* Logo */
 .logo {
   width: 400px;
   height: auto;
   image-rendering: pixelated;
 }
 
-/* Dvě tlačítka s výběrem módů */
+/* Tlačítka pro výběr módů */
 .mode-buttons {
   display: flex;
   gap: 60px;
@@ -165,6 +143,10 @@ body.start-screen {
 .mode-btn {
   width: 180px;
   height: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: transform 0.2s ease-in-out;
   image-rendering: pixelated;
 }
@@ -172,4 +154,3 @@ body.start-screen {
 .mode-btn:hover {
   transform: scale(1.1);
 }
-
