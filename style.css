@@ -122,3 +122,54 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
+
+/* --------------------------------------
+   STARTOVACÍ STRÁNKA
+----------------------------------------- */
+body.start-screen {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  background-image: url('BackroundStartPage.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain; /* zachová poměr stran obrázku */
+}
+
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+/* Logo "KarelTypo.png" */
+.logo {
+  width: 400px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Dvě tlačítka s výběrem módů */
+.mode-buttons {
+  display: flex;
+  gap: 60px;
+}
+
+.mode-btn {
+  width: 180px;
+  height: auto;
+  transition: transform 0.2s ease-in-out;
+  image-rendering: pixelated;
+}
+
+.mode-btn:hover {
+  transform: scale(1.1);
+}
+
