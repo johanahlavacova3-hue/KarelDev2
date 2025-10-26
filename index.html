@@ -1,84 +1,120 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<title>Karel The Robot 25'</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Karel The Robot 25'</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- -----------------------------
-     STARTOVACÍ OBRAZOVKA
+<!-- -------------------------------
+     ÚVODNÍ STRÁNKA
 ---------------------------------->
 <div id="start-screen">
   <h1>KAREL THE ROBOT 25'</h1>
-  <p>Zvol mód hry:</p>
   <div class="mode-buttons">
-    <button id="mode-code">Code Mode</button>
-    <button id="mode-maze">Maze Mode</button>
+    <button onclick="startMode('code')">CODE</button>
+    <button onclick="startMode('maze')">MAZE</button>
   </div>
 </div>
 
-<!-- -----------------------------
-     PŮVODNÍ OBSAH HRY
+<!-- -------------------------------
+     CODE MODE
 ---------------------------------->
-<div id="game-screen" class="hidden">
+<div id="code-mode" class="game hidden">
   <div class="sidebar">
-    <textarea id="editor" placeholder="Napiš svůj kód...
+    <textarea id="editor-code" placeholder="Napiš svůj kód...
 například:
 move();
 turnLeft();
 putBeeper();
 move();"></textarea>
-    <button id="runBtn"></button>
+    <button id="runBtn-code"></button>
   </div>
 
-  <div id="grid"></div>
+  <div id="grid-code"></div>
+</div>
+
+<!-- -------------------------------
+     MAZE MODE
+---------------------------------->
+<div id="maze-mode" class="game hidden">
+  <div class="sidebar">
+    <textarea id="editor-maze" placeholder="Napiš svůj kód pro maze...
+například:
+move();
+turnLeft();
+move();"></textarea>
+    <button id="runBtn-maze"></button>
+  </div>
+
+  <div id="grid-maze"></div>
 </div>
 
 <script>
-// ---------------------------------------------------
-// 🟩 1. Přepínání módů
-// ---------------------------------------------------
-const startScreen = document.getElementById('start-screen');
-const gameScreen = document.getElementById('game-screen');
-const modeCodeBtn = document.getElementById('mode-code');
-const modeMazeBtn = document.getElementById('mode-maze');
-let currentMode = 'code'; // výchozí
-
-modeCodeBtn.addEventListener('click', () => {
-  currentMode = 'code';
-  startScreen.classList.add('hidden');
-  gameScreen.classList.remove('hidden');
-  resetWorld();
-});
-
-modeMazeBtn.addEventListener('click', () => {
-  currentMode = 'maze';
-  startScreen.classList.add('hidden');
-  gameScreen.classList.remove('hidden');
-  startMazeWorld();
-});
-
-// ---------------------------------------------------
-// 🟩 2. Funkce pro vytvoření bludiště
-// ---------------------------------------------------
-function startMazeWorld() {
-  resetWorld();
-
-  // jednoduché „zdi“ ve vybraných buňkách
-  const wallIndices = [5, 6, 7, 15, 16, 22];
-  wallIndices.forEach(i => {
-    grid.children[i].classList.add('wall');
-  });
+/* -------------------------------------
+   Přepínání módů
+--------------------------------------*/
+function startMode(mode) {
+  document.getElementById('start-screen').classList.add('hidden');
+  if (mode === 'code') {
+    document.getElementById('code-mode').classList.remove('hidden');
+    startCodeMode();
+  } else {
+    document.getElementById('maze-mode').classList.remove('hidden');
+    startMazeMode();
+  }
 }
 
-// ---------------------------------------------------
-// 🟩 3. Rozšíření pohybu v Maze módu (kolize se zdí)
-// ---------------------------------------------------
-const originalMove = move;
-move = function() {
-  if (currentMode === 'maze') {
+/* -------------------------------------
+   CODE MODE
+--------------------------------------*/
+function startCodeMode() {
+  const grid = document.getElementById('grid-code');
+  const GRID_COLS = 7;
+  const GRID_ROWS = 4;
+
+  function createGrid() {
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
+    for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.beepers = 0;
+      grid.appendChild(cell);
+    }
+  }
+  createGrid();
+
+  const robot = document.createElement('div');
+  robot.id = 'robot';
+  grid.appendChild(robot);
+
+  let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
+  grid.children[posY * GRID_COLS + posX].appendChild(robot);
+
+  function updateRobotRotation() {
+    let angle = 0;
+    if (dir === 'up') angle = -90;
+    if (dir === 'down') angle = 90;
+    if (dir === 'left') angle = 180;
+    robot.style.transform = `rotate(${angle}deg)`;
+  }
+  updateRobotRotation();
+
+  function resetWorld() {
+    posX = 0; posY = GRID_ROWS - 1; dir = 'right';
+    updateRobotRotation();
+    document.querySelectorAll('#grid-code .cell').forEach(cell => {
+      if (cell.contains(robot)) cell.removeChild(robot);
+    });
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+    document.querySelectorAll('#grid-code .beeper').forEach(b => b.remove());
+    document.querySelectorAll('#grid-code .cell').forEach(c => c.dataset.beepers = 0);
+  }
+
+  function move() {
     let dx = 0, dy = 0;
     if (dir === 'right') dx = 1;
     if (dir === 'left') dx = -1;
@@ -86,16 +122,117 @@ move = function() {
     if (dir === 'down') dy = 1;
     const newX = posX + dx, newY = posY + dy;
     if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
-    const targetCell = grid.children[newY * GRID_COLS + newX];
-    if (targetCell.classList.contains('wall')) return; // zabrání průchodu
     grid.children[posY * GRID_COLS + posX].removeChild(robot);
     posX = newX; posY = newY;
     grid.children[posY * GRID_COLS + posX].appendChild(robot);
-  } else {
-    originalMove(); // běžné chování v Code Mode
   }
-};
-</script>
 
+  function turnLeft() {
+    if (dir === 'up') dir = 'left';
+    else if (dir === 'left') dir = 'down';
+    else if (dir === 'down') dir = 'right';
+    else if (dir === 'right') dir = 'up';
+    updateRobotRotation();
+  }
+
+  function turnRight() {
+    if (dir === 'up') dir = 'right';
+    else if (dir === 'right') dir = 'down';
+    else if (dir === 'down') dir = 'left';
+    else if (dir === 'left') dir = 'up';
+    updateRobotRotation();
+  }
+
+  function putBeeper() {
+    const cell = grid.children[posY * GRID_COLS + posX];
+    const beeper = document.createElement('div');
+    beeper.className = 'beeper';
+    cell.appendChild(beeper);
+  }
+
+  function pickBeeper() {
+    const cell = grid.children[posY * GRID_COLS + posX];
+    const beeper = cell.querySelector('.beeper');
+    if (beeper) beeper.remove();
+  }
+
+  async function runUserCode() {
+    resetWorld();
+    const code = document.getElementById('editor-code').value;
+    const lines = code.split('\n').filter(l => l.trim() !== '');
+    for (let line of lines) {
+      try {
+        await new Promise(r => setTimeout(r, 300));
+        eval(line);
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  document.getElementById('runBtn-code').addEventListener('click', runUserCode);
+}
+
+/* -------------------------------------
+   MAZE MODE (duplikát)
+--------------------------------------*/
+function startMazeMode() {
+  const grid = document.getElementById('grid-maze');
+  const GRID_COLS = 7;
+  const GRID_ROWS = 4;
+
+  function createGrid() {
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
+    for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      grid.appendChild(cell);
+    }
+  }
+  createGrid();
+
+  const robot = document.createElement('div');
+  robot.id = 'robot';
+  grid.appendChild(robot);
+
+  let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
+  grid.children[posY * GRID_COLS + posX].appendChild(robot);
+
+  function updateRobotRotation() {
+    let angle = 0;
+    if (dir === 'up') angle = -90;
+    if (dir === 'down') angle = 90;
+    if (dir === 'left') angle = 180;
+    robot.style.transform = `rotate(${angle}deg)`;
+  }
+  updateRobotRotation();
+
+  function move() {
+    let dx = 0, dy = 0;
+    if (dir === 'right') dx = 1;
+    if (dir === 'left') dx = -1;
+    if (dir === 'up') dy = -1;
+    if (dir === 'down') dy = 1;
+    const newX = posX + dx, newY = posY + dy;
+    if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
+    grid.children[posY * GRID_COLS + posX].removeChild(robot);
+    posX = newX; posY = newY;
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  }
+
+  async function runUserCode() {
+    const code = document.getElementById('editor-maze').value;
+    const lines = code.split('\n').filter(l => l.trim() !== '');
+    for (let line of lines) {
+      try {
+        await new Promise(r => setTimeout(r, 300));
+        eval(line);
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  document.getElementById('runBtn-maze').addEventListener('click', runUserCode);
+}
+</script>
 </body>
 </html>
