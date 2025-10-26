@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Karel – Maze Mode</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar">
+    <textarea id="editor" placeholder="Napiš svůj kód pro Maze...
+například:
+move();
+turnLeft();
+move();"></textarea>
+    <button id="runBtn"></button>
+  </div>
+  <div id="grid"></div>
+
+  <script>
+  const grid = document.getElementById('grid');
+  const GRID_COLS = 7;
+  const GRID_ROWS = 4;
+
+  function createGrid() {
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
+    for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      grid.appendChild(cell);
+    }
+  }
+  createGrid();
+
+  const robot = document.createElement('div');
+  robot.id = 'robot';
+  grid.appendChild(robot);
+  let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
+  grid.children[posY * GRID_COLS + posX].appendChild(robot);
+
+  function updateRobotRotation() {
+    let angle = 0;
+    if (dir === 'up') angle = -90;
+    if (dir === 'down') angle = 90;
+    if (dir === 'left') angle = 180;
+    robot.style.transform = `rotate(${angle}deg)`;
+  }
+
+  function move() {
+    let dx = 0, dy = 0;
+    if (dir === 'right') dx = 1;
+    if (dir === 'left') dx = -1;
+    if (dir === 'up') dy = -1;
+    if (dir === 'down') dy = 1;
+    const newX = posX + dx, newY = posY + dy;
+    if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
+    grid.children[posY * GRID_COLS + posX].removeChild(robot);
+    posX = newX; posY = newY;
+    grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  }
+
+  async function runUserCode() {
+    const code = document.getElementById('editor').value;
+    const lines = code.split('\n').filter(l => l.trim() !== '');
+    for (let line of lines) {
+      try {
+        await new Promise(r => setTimeout(r, 300));
+        eval(line);
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  document.getElementById('runBtn').addEventListener('click', runUserCode);
+  </script>
+</body>
+</html>
