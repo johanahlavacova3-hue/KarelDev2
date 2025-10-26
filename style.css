@@ -1,127 +1,43 @@
-/* --------------------------------------
-   CELÉ TĚLO STRÁNKY
------------------------------------------ */
-body {
-  display: flex;
-  flex-direction: row;
-  gap: 40px;
+/* ---------------------------
+   STARTOVACÍ OBRAZOVKA
+------------------------------*/
+#start-screen {
+  text-align: center;
   font-family: monospace;
-  padding: 40px;
-  height: 100vh;
-  margin: 0;
-  box-sizing: border-box;
-  background-color: #000000; /* velmi tmavé pozadí */
-  justify-content: center;
-  align-items: center;
   color: #d6d6d6;
 }
 
-/* --------------------------------------
-   POSTRANNÍ PANEL
------------------------------------------ */
-.sidebar {
+.mode-buttons {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* editor nahoře, tlačítko dole */
-  height: 400px;                  /* zarovnáno s gridem */
-  width: 280px;
-  background-color: #0f0f0f;
-  padding: 10px;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 40px;
 }
 
-/* --------------------------------------
-   TEXTOVÝ EDITOR
------------------------------------------ */
-#editor {
-  flex: 1;
-  font-family: monospace;
-  resize: none;
-  padding: 10px;
-  box-sizing: border-box;
-  font-size: 15px;
-  color: #E2E2E2;                /* zeleno-tyrkysový terminálový text */
-  background-color: #1b1b1b; /*#0f0f0f*/
-  border: none;
-  outline: none;
-  height: calc(100% - 60px);     /* natáhne se téměř po celý sidebar */
-}
-
-/* --------------------------------------
-   TLAČÍTKO SPUSTIT (jen samotné PNG)
------------------------------------------ */
-button {
-  align-self: center;
-  width: 36px;
-  height: 36px;
-  background-image: url('Play.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+#start-screen button {
+  background-color: #1b1b1b;
+  color: #d6d6d6;
+  border: 1px solid #333;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  border: none;              /* odstraní rámeček */
-  background-color: transparent; /* žádné pozadí */
-  padding: 0;                /* žádné vnitřní odsazení */
-  outline: none;             /* žádná obrysová čára při focusu */
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease, background-color 0.3s;
 }
 
-button:hover {
-  transform: scale(1.1);
+#start-screen button:hover {
+  background-color: #333;
+  transform: scale(1.05);
 }
 
-/* --------------------------------------
-   HERNÍ GRID
------------------------------------------ */
-#grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  border: 0px solid #2c2c2c;
-  width: 700px;
-  height: 420px;
-  background-color: #0f0f0f;
+.hidden {
+  display: none;
 }
 
-/* --------------------------------------
-   BUŇKY GRIDU
------------------------------------------ */
-.cell {
-  position: relative;
-  background-image: url('grid.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* --------------------------------------
-   ROBOT KAREL
------------------------------------------ */
-#robot {
-  width: 110%;
-  height: 110%;
-  background-image: url('KarelRobot.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  transition: all 0.3s;
-  z-index: 10;
-}
-
-/* --------------------------------------
-   BEEPERY (sbíratelné objekty)
------------------------------------------ */
-.beeper {
-  position: center;
-  width: 100%;                 /* velikost v poměru k buňce */
-  height: 100%;
-  bottom: 10%;                /* umístění ke spodnímu okraji buňky */
-  right: 10%;
-  background-image: url('Beeper.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 5;                 /* aby byl vidět nad pozadím, ale pod robotem */
+/* ---------------------------
+   ZDI PRO MAZE MODE
+------------------------------*/
+.wall {
+  background-color: #333;
+  background-image: none !important;
+  box-shadow: inset 0 0 10px #000;
 }
