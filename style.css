@@ -24,6 +24,7 @@ body {
   background-color: #0f0f0f;
   padding: 10px;
   margin-right: 40px;
+  position: relative; /* pro umístění home tlačítka */
 }
 
 #editor {
@@ -55,6 +56,36 @@ body {
   transition: transform 0.2s;
 }
 #runBtn:hover {
+  transform: scale(1.1);
+}
+
+/* --------------------------------------
+   HOME BUTTON (pouze pro herní stránky)
+----------------------------------------- */
+.home-btn {
+  position: absolute;
+  top: -50px; /* nad textovým polem */
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.home-btn img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: none;
+  border: none;
+  image-rendering: pixelated;
+  transition: transform 0.2s ease-in-out;
+}
+
+.home-btn:hover img {
   transform: scale(1.1);
 }
 
@@ -152,34 +183,5 @@ body.start-screen {
 }
 
 .mode-btn:hover {
-  transform: scale(1.1);
-}
-
-/* --------------------------------------
-   HOME BUTTON (přidáno)
------------------------------------------ */
-.home-btn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 50px;
-  height: 50px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1000;
-}
-
-.home-btn img {
-  width: 100%;
-  height: auto;
-  background: none;
-  border: none;
-  display: block;
-  image-rendering: pixelated;
-  transition: transform 0.2s ease-in-out;
-}
-
-.home-btn:hover img {
   transform: scale(1.1);
 }
