@@ -4,22 +4,6 @@
   <meta charset="UTF-8">
   <title>Karel The Robot 25' – Maze</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .home-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      width: 60px;
-      height: auto;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 20;
-      transition: transform 0.2s ease-in-out;
-    }
-    .home-btn:hover { transform: scale(1.1); }
-    .home-btn img { width: 100%; height: auto; display: block; }
-  </style>
 </head>
 <body>
 
@@ -29,6 +13,9 @@
   </a>
 
   <div class="sidebar">
+    <!-- Zvýrazněný text -->
+    <div id="highlighted"></div>
+    <!-- Textarea pro psaní -->
     <textarea id="editor" placeholder="Napiš svůj kód...
 například:
 move();
@@ -41,15 +28,14 @@ move();"></textarea>
   <div id="grid"></div>
 
   <script>
-  // ------------------------------
-  // Mřížka
-  // ------------------------------
   const grid = document.getElementById('grid');
   const GRID_COLS = 7;
   const GRID_ROWS = 4;
 
+  // ------------------- Grid -------------------
   function createGrid() {
     grid.innerHTML = '';
+    grid.style.display = 'grid';
     grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
     for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
@@ -60,9 +46,7 @@ move();"></textarea>
   }
   createGrid();
 
-  // ------------------------------
-  // Robot
-  // ------------------------------
+  // ------------------- Robot -------------------
   const robot = document.createElement('div');
   robot.id = 'robot';
   grid.appendChild(robot);
@@ -89,9 +73,7 @@ move();"></textarea>
     document.querySelectorAll('.beeper').forEach(b => b.remove());
   }
 
-  // ------------------------------
-  // Příkazy Karela
-  // ------------------------------
+  // ------------------- Příkazy -------------------
   function move() {
     let dx = 0, dy = 0;
     if (dir === 'right') dx = 1;
@@ -126,12 +108,7 @@ move();"></textarea>
     if (beeper) beeper.remove();
   }
 
-  // ------------------------------
-  // Spouštění
-  // ------------------------------
-  function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function runUserCode() {
     resetWorld();
@@ -148,7 +125,31 @@ move();"></textarea>
   }
 
   document.getElementById('runBtn').addEventListener('click', runUserCode);
-  </script>
 
+  // ------------------- Zvýraznění -------------------
+  const editor = document.getElementById('editor');
+  const highlighted = document.getElementById('highlighted');
+
+  function updateHighlight() {
+    const lines = editor.value.split('\n');
+    let html = '';
+    for (let i = 0; i < lines.length; i++) {
+      const prev = lines[i-1] || '';
+      const current = lines[i];
+
+      if (current.trim().startsWith('//')) {
+        html += `<span style="color:#36dc36">${prev}</span>\n`;
+      } else {
+        if (!(lines[i+1] && lines[i+1].trim().startsWith('//'))) {
+          html += `${current}\n`;
+        }
+      }
+    }
+    highlighted.innerHTML = html;
+  }
+
+  editor.addEventListener('input', updateHighlight);
+  updateHighlight();
+  </script>
 </body>
 </html>
