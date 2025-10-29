@@ -64,8 +64,8 @@ body {
 ----------------------------------------- */
 .home-btn {
   position: absolute;
-  top: 80px; /* nad textovým polem */
-  left: 100;
+  top: -60px;         /* 40px výška tlačítka + 20px mezera = 60px nad textovým polem */
+  left: 10px;         /* zarovnání podle levého okraje sidebaru */
   width: 40px;
   height: 40px;
   background: none;
@@ -79,8 +79,6 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  background: none;
-  border: none;
   image-rendering: pixelated;
   transition: transform 0.2s ease-in-out;
 }
