@@ -24,21 +24,37 @@ body {
   background-color: #0f0f0f;
   padding: 10px;
   margin-right: 40px;
-  position: relative; /* pro umístění home tlačítka */
+  position: relative; /* pro overlay home tlačítka a editor */
+  box-sizing: border-box;
 }
 
+/* Overlay pro zvýraznění */
+#highlighted {
+  font-family: monospace;
+  white-space: pre-wrap;
+  color: #E2E2E2;
+  padding: 10px;
+  background-color: #1b1b1b;
+  height: calc(100% - 60px);
+  overflow-y: auto;
+}
+
+/* Textarea transparentní, nad divem #highlighted */
 #editor {
-  flex: 1;
+  position: absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: transparent;
+  color: transparent; /* text samotný není vidět */
+  caret-color: #E2E2E2; /* barva kurzoru */
   font-family: monospace;
   resize: none;
-  padding: 10px;
-  box-sizing: border-box;
-  font-size: 15px;
-  color: #E2E2E2;
-  background-color: #1b1b1b;
   border: none;
-  outline: none;
-  height: calc(100% - 60px);
+  padding:10px;
+  box-sizing:border-box;
+  font-size: 15px;
 }
 
 /* tlačítko Play (jen PNG) */
