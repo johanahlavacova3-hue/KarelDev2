@@ -64,8 +64,8 @@ body {
 ----------------------------------------- */
 .home-btn {
   position: absolute;
-  top: -50px; /* nad textovým polem */
-  left: 0;
+  top: 80px; /* nad textovým polem */
+  left: 100;
   width: 40px;
   height: 40px;
   background: none;
