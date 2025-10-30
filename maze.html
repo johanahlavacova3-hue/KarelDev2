@@ -4,10 +4,40 @@
 <meta charset="UTF-8">
 <title>Karel The Robot 25' maze</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  .home-btn {
+    position: absolute;
+    top: -60px; /* 40px výška + 20px mezera */
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s ease-in-out;
+  }
+  .home-btn:hover { transform: scale(1.1); }
+  .home-btn img {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+  }
+  .sidebar {
+    position: relative; /* kvůli absolutnímu pozicování tlačítka */
+  }
+</style>
 </head>
 <body>
 
 <div class="sidebar">
+  <!-- >>> HOME BUTTON přidán sem <<< -->
+  <a href="index.html" class="home-btn">
+    <img src="Home.png" alt="Home">
+  </a>
+
   <textarea id="editor" placeholder="Napiš svůj kód...
 například:
 move();
