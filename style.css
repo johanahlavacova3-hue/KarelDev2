@@ -193,7 +193,7 @@ body.start-screen {
   height: auto;
   z-index: 200;
   display: none;
-  animation: blink 0.1s infinite alternate;
+  animation: blink 0.15s infinite alternate;
   image-rendering: pixelated;
 }
 
