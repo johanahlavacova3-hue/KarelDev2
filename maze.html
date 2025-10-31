@@ -4,53 +4,6 @@
 <meta charset="UTF-8">
 <title>Karel The Robot 25' maze</title>
 <link rel="stylesheet" href="style.css">
-<style>
-  .home-btn {
-    position: absolute;
-    top: -60px;
-    left: 10px;
-    width: 40px;
-    height: 40px;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    z-index: 100;
-    transition: transform 0.2s ease-in-out;
-  }
-  .home-btn:hover { transform: scale(1.1); }
-  .home-btn img {
-    width: 100%;
-    height: auto;
-    display: block;
-    image-rendering: pixelated;
-  }
-  .sidebar { position: relative; }
-
-  .wall {
-    background-image: url('Wall.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .won {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 250px;
-    height: auto;
-    z-index: 200;
-    display: none;
-    animation: blink 0.4s infinite alternate;
-  }
-
-  @keyframes blink {
-    from { content: url('WON-bright.png'); opacity: 1; }
-    to   { content: url('WON-dark.png'); opacity: 0.7; }
-  }
-</style>
 </head>
 <body>
 
@@ -58,6 +11,14 @@
   <a href="index.html" class="home-btn">
     <img src="Home.png" alt="Home">
   </a>
+
+  <!-- >>> NOVÉ: Počítadlo Beeperů <<< -->
+  <div class="beeper-counter">
+    <div class="beeper-icon" id="beeper1"></div>
+    <div class="beeper-icon" id="beeper2"></div>
+    <div class="beeper-icon" id="beeper3"></div>
+  </div>
+  <!-- >>> KONEC NOVÉHO <<< -->
 
   <textarea id="editor" placeholder="Napiš svůj kód...
 například:
@@ -100,8 +61,15 @@ const levels = [
 let currentLevel = 0;
 
 // --------------------------------------
-// Tvorba mřížky a reset
+// Robot a level setup
 // --------------------------------------
+const robot = document.createElement('div');
+robot.id = 'robot';
+grid.appendChild(robot);
+
+let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
+let collectedCount = 0;
+
 function createGrid() {
   grid.innerHTML = '';
   grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
@@ -118,6 +86,7 @@ function getCell(x, y) {
 }
 
 function setupLevel(levelIndex) {
+  resetBeeperCounter();
   createGrid();
   const level = levels[levelIndex];
   posX = level.start[0];
@@ -141,17 +110,11 @@ function setupLevel(levelIndex) {
 }
 
 createGrid();
-
-// --------------------------------------
-// Robot
-// --------------------------------------
-const robot = document.createElement('div');
-robot.id = 'robot';
-grid.appendChild(robot);
-
-let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
 setupLevel(currentLevel);
 
+// --------------------------------------
+// Pohyb a akce
+// --------------------------------------
 function updateRobotRotation() {
   let angle = 0;
   if (dir === 'up') angle = -90;
@@ -160,9 +123,6 @@ function updateRobotRotation() {
   robot.style.transform = `rotate(${angle}deg)`;
 }
 
-// --------------------------------------
-// Pohyb
-// --------------------------------------
 function isWall(x, y) {
   return getCell(x, y).classList.contains('wall');
 }
@@ -183,9 +143,6 @@ function move() {
   getCell(posX, posY).appendChild(robot);
 }
 
-// --------------------------------------
-// Ostatní příkazy
-// --------------------------------------
 function turnLeft() {
   if (dir === 'up') dir = 'left';
   else if (dir === 'left') dir = 'down';
@@ -207,6 +164,8 @@ function pickBeeper() {
   const b = cell.querySelector('.beeper');
   if (b) {
     b.remove();
+    collectedCount++;
+    updateBeeperCounter(collectedCount);
     checkWin();
   }
 }
@@ -227,8 +186,30 @@ function checkWin() {
 
 function nextLevel() {
   currentLevel++;
-  if (currentLevel >= levels.length) currentLevel = 0; // loop zpět na level 1
+  if (currentLevel >= levels.length) currentLevel = 0;
   setupLevel(currentLevel);
+}
+
+// --------------------------------------
+// Počítadlo Beeperů
+// --------------------------------------
+function resetBeeperCounter() {
+  collectedCount = 0;
+  document.querySelectorAll('.beeper-icon').forEach(icon => {
+    icon.classList.remove('collected', 'blink');
+    icon.style.opacity = 0.5;
+  });
+}
+
+function updateBeeperCounter(count) {
+  const icon = document.getElementById(`beeper${count}`);
+  if (icon) {
+    icon.classList.add('blink');
+    setTimeout(() => {
+      icon.classList.remove('blink');
+      icon.classList.add('collected');
+    }, 1000); // po 5 bliknutích
+  }
 }
 
 // --------------------------------------
