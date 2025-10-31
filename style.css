@@ -193,13 +193,13 @@ body.start-screen {
   height: auto;
   z-index: 200;
   display: none;
-  animation: blink 0.4s infinite alternate;
+  animation: blink 0.1s infinite alternate;
   image-rendering: pixelated;
 }
 
 @keyframes blink {
   from { content: url('WON-bright.png'); opacity: 1; }
-  to { content: url('WON-dark.png'); opacity: 0.7; }
+  to { content: url('WON-dark.png'); opacity: 1; }
 }
 
 /* -------------------------------------- BEEPER COUNTER ----------------------------------------- */
