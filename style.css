@@ -234,5 +234,5 @@ body.start-screen {
 }
 
 .beeper-icon.blink {
-  animation: blinkFast 0.2s step-start 5;
+  animation: blinkFast 0.2s step-start 3;
 }
