@@ -201,3 +201,38 @@ body.start-screen {
   from { content: url('WON-bright.png'); opacity: 1; }
   to { content: url('WON-dark.png'); opacity: 0.7; }
 }
+
+/* -------------------------------------- BEEPER COUNTER ----------------------------------------- */
+.beeper-counter {
+  position: absolute;
+  top: -60px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.beeper-icon {
+  width: 36px;
+  height: 36px;
+  background-image: url('Beeper.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.5;
+  transition: opacity 0.1s ease-in-out;
+  image-rendering: pixelated;
+}
+
+.beeper-icon.collected {
+  opacity: 1;
+}
+
+@keyframes blinkFast {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.beeper-icon.blink {
+  animation: blinkFast 0.2s step-start 5;
+}
