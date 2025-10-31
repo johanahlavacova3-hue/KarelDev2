@@ -7,7 +7,7 @@
 <style>
   .home-btn {
     position: absolute;
-    top: -60px; /* 40px výška + 20px mezera */
+    top: -60px;
     left: 10px;
     width: 40px;
     height: 40px;
@@ -25,15 +25,36 @@
     display: block;
     image-rendering: pixelated;
   }
-  .sidebar {
-    position: relative; /* kvůli absolutnímu pozicování tlačítka */
+  .sidebar { position: relative; }
+
+  .wall {
+    background-image: url('Wall.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .won {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: auto;
+    z-index: 200;
+    display: none;
+    animation: blink 0.4s infinite alternate;
+  }
+
+  @keyframes blink {
+    from { content: url('WON-bright.png'); opacity: 1; }
+    to   { content: url('WON-dark.png'); opacity: 0.7; }
   }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <!-- >>> HOME BUTTON přidán sem <<< -->
   <a href="index.html" class="home-btn">
     <img src="Home.png" alt="Home">
   </a>
@@ -42,21 +63,45 @@
 například:
 move();
 turnLeft();
-putBeeper();
-move();"></textarea>
+pickBeeper();"></textarea>
   <button id="runBtn"></button>
 </div>
 
 <div id="grid"></div>
+<img id="wonImage" class="won" src="WON-bright.png" alt="WON">
 
 <script>
 // --------------------------------------
-// Nastavení mřížky
+// Herní mřížka
 // --------------------------------------
 const grid = document.getElementById('grid');
 const GRID_COLS = 7;
 const GRID_ROWS = 4;
 
+// Level data
+const levels = [
+  {
+    start: [0, 3],
+    walls: [[2, 3], [3, 3], [3, 2]],
+    beepers: [[5, 0], [6, 2], [1, 1]]
+  },
+  {
+    start: [0, 2],
+    walls: [[1, 2], [1, 1], [4, 3], [5, 3], [5, 2]],
+    beepers: [[6, 0], [3, 1], [2, 3]]
+  },
+  {
+    start: [0, 3],
+    walls: [[1, 3], [2, 3], [3, 2], [4, 1], [5, 1], [6, 1]],
+    beepers: [[6, 3], [5, 0], [2, 0]]
+  }
+];
+
+let currentLevel = 0;
+
+// --------------------------------------
+// Tvorba mřížky a reset
+// --------------------------------------
 function createGrid() {
   grid.innerHTML = '';
   grid.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
@@ -64,10 +109,37 @@ function createGrid() {
   for (let i = 0; i < GRID_COLS * GRID_ROWS; i++) {
     const cell = document.createElement('div');
     cell.className = 'cell';
-    cell.dataset.beepers = 0;
     grid.appendChild(cell);
   }
 }
+
+function getCell(x, y) {
+  return grid.children[y * GRID_COLS + x];
+}
+
+function setupLevel(levelIndex) {
+  createGrid();
+  const level = levels[levelIndex];
+  posX = level.start[0];
+  posY = level.start[1];
+  dir = 'right';
+  updateRobotRotation();
+
+  // Kameny
+  level.walls.forEach(([x, y]) => {
+    getCell(x, y).classList.add('wall');
+  });
+
+  // Beepery
+  level.beepers.forEach(([x, y]) => {
+    const b = document.createElement('div');
+    b.className = 'beeper';
+    getCell(x, y).appendChild(b);
+  });
+
+  getCell(posX, posY).appendChild(robot);
+}
+
 createGrid();
 
 // --------------------------------------
@@ -78,7 +150,7 @@ robot.id = 'robot';
 grid.appendChild(robot);
 
 let posX = 0, posY = GRID_ROWS - 1, dir = 'right';
-grid.children[posY * GRID_COLS + posX].appendChild(robot);
+setupLevel(currentLevel);
 
 function updateRobotRotation() {
   let angle = 0;
@@ -87,22 +159,14 @@ function updateRobotRotation() {
   if (dir === 'left') angle = 180;
   robot.style.transform = `rotate(${angle}deg)`;
 }
-updateRobotRotation();
 
-function resetWorld() {
-  posX = 0; posY = GRID_ROWS - 1; dir = 'right';
-  updateRobotRotation();
-  document.querySelectorAll('#grid .cell').forEach(cell => {
-    if (cell.contains(robot)) cell.removeChild(robot);
-  });
-  grid.children[posY * GRID_COLS + posX].appendChild(robot);
-  document.querySelectorAll('.beeper').forEach(b => b.remove());
-  document.querySelectorAll('#grid .cell').forEach(c => c.dataset.beepers = 0);
+// --------------------------------------
+// Pohyb
+// --------------------------------------
+function isWall(x, y) {
+  return getCell(x, y).classList.contains('wall');
 }
 
-// --------------------------------------
-// Příkazy Karela
-// --------------------------------------
 function move() {
   let dx = 0, dy = 0;
   if (dir === 'right') dx = 1;
@@ -110,12 +174,18 @@ function move() {
   if (dir === 'up') dy = -1;
   if (dir === 'down') dy = 1;
   const newX = posX + dx, newY = posY + dy;
+
   if (newX < 0 || newX >= GRID_COLS || newY < 0 || newY >= GRID_ROWS) return;
-  grid.children[posY * GRID_COLS + posX].removeChild(robot);
+  if (isWall(newX, newY)) return;
+
+  getCell(posX, posY).removeChild(robot);
   posX = newX; posY = newY;
-  grid.children[posY * GRID_COLS + posX].appendChild(robot);
+  getCell(posX, posY).appendChild(robot);
 }
 
+// --------------------------------------
+// Ostatní příkazy
+// --------------------------------------
 function turnLeft() {
   if (dir === 'up') dir = 'left';
   else if (dir === 'left') dir = 'down';
@@ -132,59 +202,42 @@ function turnRight() {
   updateRobotRotation();
 }
 
-function putBeeper() {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  const beeper = document.createElement('div');
-  beeper.className = 'beeper';
-  cell.appendChild(beeper);
-}
-
 function pickBeeper() {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  const beeper = cell.querySelector('.beeper');
-  if (beeper) beeper.remove();
-}
-
-function paintCorner(color = 'blue') {
-  const cell = grid.children[posY * GRID_COLS + posX];
-  cell.style.backgroundColor = color;
-}
-
-// --------------------------------------
-// Podmínky
-// --------------------------------------
-function frontIsClear() {
-  if (dir === 'up' && posY > 0) return true;
-  if (dir === 'down' && posY < GRID_ROWS - 1) return true;
-  if (dir === 'left' && posX > 0) return true;
-  if (dir === 'right' && posX < GRID_COLS - 1) return true;
-  return false;
-}
-function frontIsBlocked() { return !frontIsClear(); }
-
-function facingNorth() { return dir === 'up'; }
-function facingSouth() { return dir === 'down'; }
-function facingEast() { return dir === 'right'; }
-function facingWest() { return dir === 'left'; }
-
-function notFacingNorth() { return !facingNorth(); }
-function notFacingSouth() { return !facingSouth(); }
-function notFacingEast() { return !facingEast(); }
-function notFacingWest() { return !facingWest(); }
-
-function random(p = 0.5) {
-  return Math.random() < p;
+  const cell = getCell(posX, posY);
+  const b = cell.querySelector('.beeper');
+  if (b) {
+    b.remove();
+    checkWin();
+  }
 }
 
 // --------------------------------------
-// Spouštění uživatelského kódu
+// Výhra
 // --------------------------------------
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function checkWin() {
+  if (grid.querySelectorAll('.beeper').length === 0) {
+    const wonImg = document.getElementById('wonImage');
+    wonImg.style.display = 'block';
+    setTimeout(() => {
+      wonImg.style.display = 'none';
+      nextLevel();
+    }, 3000);
+  }
 }
+
+function nextLevel() {
+  currentLevel++;
+  if (currentLevel >= levels.length) currentLevel = 0; // loop zpět na level 1
+  setupLevel(currentLevel);
+}
+
+// --------------------------------------
+// Spuštění kódu hráče
+// --------------------------------------
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function runUserCode() {
-  resetWorld();
+  setupLevel(currentLevel);
   const code = document.getElementById('editor').value;
   const lines = code.split('\n').filter(l => l.trim() !== '');
   for (let line of lines) {
