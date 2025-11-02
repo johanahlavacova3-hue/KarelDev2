@@ -233,6 +233,12 @@ body.start-screen {
   50% { opacity: 1; }
 }
 
+/* beeper při blikání */
 .beeper-icon.blink {
-  animation: blinkFast 0.2s step-start 3;
+  animation: blinkFast 0.2s step-start 5 forwards;
+}
+
+/* po dokončení blikání zůstane trvale svítit */
+.beeper-icon.collected {
+  opacity: 1;
 }
