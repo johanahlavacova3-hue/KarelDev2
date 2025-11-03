@@ -236,3 +236,23 @@ document.getElementById('runBtn').addEventListener('click', runUserCode);
 
 </body>
 </html>
+
+<script>
+function updateBeeperCounter(index) {
+  const icon = document.getElementById(`beeper${index}`);
+  if (!icon) return;
+
+  // pokud už je sebraný, nic nedělej
+  if (icon.classList.contains('collected')) return;
+
+  // přidej blikání
+  icon.classList.add('blink');
+
+  // po dokončení animace blikání se stane trvale svítícím
+  icon.addEventListener('animationend', () => {
+    icon.classList.remove('blink');
+    icon.classList.add('collected');
+  }, { once: true });
+}
+</script>
+
