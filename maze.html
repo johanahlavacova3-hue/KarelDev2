@@ -12,13 +12,12 @@
     <img src="Home.png" alt="Home">
   </a>
 
-  <!-- >>> NOVÉ: Počítadlo Beeperů <<< -->
+  <!-- Počítadlo Beeperů -->
   <div class="beeper-counter">
     <div class="beeper-icon" id="beeper1"></div>
     <div class="beeper-icon" id="beeper2"></div>
     <div class="beeper-icon" id="beeper3"></div>
   </div>
-  <!-- >>> KONEC NOVÉHO <<< -->
 
   <textarea id="editor" placeholder="Napiš svůj kód...
 například:
@@ -39,22 +38,51 @@ const grid = document.getElementById('grid');
 const GRID_COLS = 7;
 const GRID_ROWS = 4;
 
-// Level data
+// --------------------------------------
+// LEVELY
+// souřadnice [x, y]:
+// x = sloupec zleva doprava (0–6)
+// y = řádek shora dolů (0–3)
+// start = pozice robota
+// walls = kameny (neprůchozí)
+// beepers = pozice předmětů
+// --------------------------------------
 const levels = [
+  // Level 1 — jednoduchý
   {
     start: [0, 3],
     walls: [[2, 3], [3, 3], [3, 2]],
     beepers: [[5, 0], [6, 2], [1, 1]]
   },
+  // Level 2 — zatáčka
   {
-    start: [0, 2],
+    start: [0, 3],
     walls: [[1, 2], [1, 1], [4, 3], [5, 3], [5, 2]],
     beepers: [[6, 0], [3, 1], [2, 3]]
   },
+  // Level 3 — diagonála (opravený)
   {
     start: [0, 3],
-    walls: [[1, 4], [2, 3], [3, 2], [4, 1], [5, 1], [6, 1]],
-    beepers: [[6, 3], [5, 0], [2, 0]]
+    walls: [[1, 3], [2, 2], [3, 1], [4, 0], [5, 0], [6, 0]],
+    beepers: [[6, 3], [5, 2], [2, 0]]
+  },
+  // Level 4 — most s překážkami
+  {
+    start: [0, 3],
+    walls: [[3, 3], [3, 2], [3, 1]],
+    beepers: [[6, 0], [0, 0], [2, 1]]
+  },
+  // Level 5 — malý labyrint
+  {
+    start: [0, 3],
+    walls: [[1, 3], [1, 2], [2, 1], [4, 2], [5, 1], [6, 1]],
+    beepers: [[0, 0], [3, 3], [6, 3]]
+  },
+  // Level 6 — finální (cikcak)
+  {
+    start: [0, 3],
+    walls: [[1, 2], [2, 1], [3, 2], [4, 1], [5, 2]],
+    beepers: [[6, 0], [0, 1], [4, 3]]
   }
 ];
 
@@ -96,14 +124,18 @@ function setupLevel(levelIndex) {
 
   // Kameny
   level.walls.forEach(([x, y]) => {
-    getCell(x, y).classList.add('wall');
+    if (x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS) {
+      getCell(x, y).classList.add('wall');
+    }
   });
 
   // Beepery
   level.beepers.forEach(([x, y]) => {
-    const b = document.createElement('div');
-    b.className = 'beeper';
-    getCell(x, y).appendChild(b);
+    if (x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS) {
+      const b = document.createElement('div');
+      b.className = 'beeper';
+      getCell(x, y).appendChild(b);
+    }
   });
 
   getCell(posX, posY).appendChild(robot);
@@ -171,7 +203,7 @@ function pickBeeper() {
 }
 
 // --------------------------------------
-// Výhra
+// Výhra a přechod na další level
 // --------------------------------------
 function checkWin() {
   if (grid.querySelectorAll('.beeper').length === 0) {
@@ -201,15 +233,17 @@ function resetBeeperCounter() {
   });
 }
 
-function updateBeeperCounter(count) {
-  const icon = document.getElementById(`beeper${count}`);
-  if (icon) {
-    icon.classList.add('blink');
-    setTimeout(() => {
-      icon.classList.remove('blink');
-      icon.classList.add('collected');
-    }, 1000); // po 5 bliknutích
-  }
+function updateBeeperCounter(index) {
+  const icon = document.getElementById(`beeper${index}`);
+  if (!icon) return;
+
+  if (icon.classList.contains('collected')) return;
+
+  icon.classList.add('blink');
+  icon.addEventListener('animationend', () => {
+    icon.classList.remove('blink');
+    icon.classList.add('collected');
+  }, { once: true });
 }
 
 // --------------------------------------
@@ -236,23 +270,3 @@ document.getElementById('runBtn').addEventListener('click', runUserCode);
 
 </body>
 </html>
-
-<script>
-function updateBeeperCounter(index) {
-  const icon = document.getElementById(`beeper${index}`);
-  if (!icon) return;
-
-  // pokud už je sebraný, nic nedělej
-  if (icon.classList.contains('collected')) return;
-
-  // přidej blikání
-  icon.classList.add('blink');
-
-  // po dokončení animace blikání se stane trvale svítícím
-  icon.addEventListener('animationend', () => {
-    icon.classList.remove('blink');
-    icon.classList.add('collected');
-  }, { once: true });
-}
-</script>
-
