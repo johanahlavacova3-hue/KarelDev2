@@ -219,26 +219,24 @@ body.start-screen {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.5;
-  transition: opacity 0.1s ease-in-out;
+  opacity: 0.4;
+  transition: opacity 0.2s ease-in-out;
   image-rendering: pixelated;
 }
 
-.beeper-icon.collected {
-  opacity: 1;
-}
-
+/* animace blikání */
 @keyframes blinkFast {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
 
-/* beeper při blikání */
+/* během blikání */
 .beeper-icon.blink {
-  animation: blinkFast 0.2s step-start 5 forwards;
+  animation: blinkFast 0.25s steps(1) 4;
 }
 
-/* po dokončení blikání zůstane trvale svítit */
+/* po sebrání zůstane svítit */
 .beeper-icon.collected {
-  opacity: 1;
+  opacity: 1 !important;
+  animation: none !important;
 }
